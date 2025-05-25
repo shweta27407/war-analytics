@@ -89,15 +89,15 @@ streamlit run data_loader2.py
 ## Key Highlights
 
 This project demonstrates:
-	•	✅ End-to-end pipeline design
-	•	✅ SPARQL and semantic data querying skills
-	•	✅ Clean transformation logic with custom rules
-	•	✅ Dashboard development for real-time insights
+- ✅ End-to-end pipeline design
+- ✅ SPARQL and semantic data querying skills
+- ✅ Clean transformation logic with custom rules
+- ✅ Dashboard development for real-time insights
 
 
 ##  Possible Extensions
 
-	•	Add geolocation and world map overlays
-	•	Store transformed data in a cloud DB (e.g., PostgreSQL, BigQuery)
-	•	Schedule SPARQL refreshes with Airflow
-	•	Deploy dashboard on Streamlit Cloud
+- Add geolocation and world map overlays
+- Store transformed data in a cloud DB (e.g., PostgreSQL, BigQuery)
+- Schedule SPARQL refreshes with Airflow
+- Deploy dashboard on Streamlit Cloud
