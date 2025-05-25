@@ -15,16 +15,40 @@ df = load_data()
 # Title
 st.title("📜 Historical Wars Dashboard")
 
-# Sidebar: Filter by Country (from Normalized Participant column)
+# --------------- Sidebar configuration ---------------
+
+st.sidebar.header("Filter Options")
+
+# filter by time range
+min_year = int(df['Start Date'].dropna().dt.year.min())
+max_year = int(df['End Date'].dropna().dt.year.max())
+
+selected_year_range = st.sidebar.slider(
+    "Select Time Period",
+    min_value=min_year,
+    max_value=max_year,
+    value=(min_year, max_year)
+)
+
+# filter by Country (from Normalized Participant column)
 st.sidebar.header("Filter by Country")
 normalized_countries = sorted(df['Normalized Participant'].dropna().unique())
 selected_countries = st.sidebar.multiselect("Select Countries", normalized_countries)
+
+
+# ------------- Data Filtering ---------------
 
 # Filter data using the selected countries
 if selected_countries:
     filtered_df = df[df['Normalized Participant'].isin(selected_countries)]
 else:
     filtered_df = df.copy()
+
+# Filter data using the selected year range
+filtered_df = filtered_df[
+    (filtered_df['Start Date'].dt.year >= selected_year_range[0]) &
+    (filtered_df['End Date'].dt.year <= selected_year_range[1])
+]
 
 # --------------------------
 # Dashboard Display
