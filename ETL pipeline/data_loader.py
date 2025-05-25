@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 df = pd.read_csv("/Users/shwetabambal/Documents/myrepos/war-analytics/war_data_sorted.csv")
 
 # Filter for selected world powers
-selected_powers = ["India", "Pakistan", "USA", "Russia", "China", "Europe", "USA"]
+selected_powers = ["India", "Pakistan", "USA", "Russia", "China", "Europe"]
 filtered_df = df[df["Normalized Participant"].isin(selected_powers)]
 
 # save fitered data to sorted csv
