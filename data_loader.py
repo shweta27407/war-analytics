@@ -4,33 +4,6 @@ import matplotlib.pyplot as plt
 # Load the data
 df = pd.read_csv("/Users/shwetabambal/Documents/myrepos/war-analytics/war_data_sorted.csv")
 
-# Normalize participant names
-country_mapping = {
-    "Dominion of India": "India",
-    "India": "India",
-    "Dominion of Pakistan": "Pakistan",
-    "Pakistan Armed Forces": "Pakistan",
-    "Pakistan": "Pakistan",
-    "United States of America": "USA",
-    "United States": "USA",
-    "Soviet Union": "Russia",
-    "Russian Empire": "Russia",
-    "Russia": "Russia",
-    "People's Republic of China": "China",
-    "China": "China",
-    "United Kingdom": "Europe",
-    "France": "Europe",
-    "Germany": "Europe",
-    "British Indian Army": "India",
-    "East India Company": "Europe",
-    "Dutch East India Company": "Europe",
-    "Dutch West India Company": "Europe",
-    "Danish India": "Europe"
-}
-
-# Apply mapping
-df["Normalized Participant"] = df["Participant"].map(country_mapping)
-
 # Filter for selected world powers
 selected_powers = ["India", "Pakistan", "USA", "Russia", "China", "Europe", "USA"]
 filtered_df = df[df["Normalized Participant"].isin(selected_powers)]
