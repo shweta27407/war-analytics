@@ -2,7 +2,7 @@ import pandas as pd
 
 # load data
 df = pd.read_csv("/Users/shwetabambal/Documents/myrepos/war-analytics/war_data.csv",
-                 names=["War", "Start Date", "End Date", "Cause", "Participant"])
+                 names=["War", "Start Date", "End Date", "Participant", "Location", "Casualties", "Cause", "Effect"],)
 
 
 # Convert both to datetime
@@ -25,9 +25,9 @@ print("Data sorted by Start Date and saved successfully.")
 
 
 # Wars fought by India and Pakistan
-df_india_pakistan = df_sorted[df_sorted["Participant"].str.contains("India|Pakistan", na=False)]
-df_india_pakistan.to_csv("/Users/shwetabambal/Documents/myrepos/war-analytics/india_pakistan_wars.csv", index=False)
+#df_india_pakistan = df_sorted[df_sorted["Participant"].str.contains("India|Pakistan", na=False)]
+#df_india_pakistan.to_csv("/Users/shwetabambal/Documents/myrepos/war-analytics/india_pakistan_wars.csv", index=False)
 
 # Wars fought by USA and Russia
-df_usa_russia = df_sorted[df_sorted["Participant"].str.contains("United States|Russia", na=False)]
-df_usa_russia.to_csv("/Users/shwetabambal/Documents/myrepos/war-analytics/usa_russia_wars.csv", index=False)
+#df_usa_russia = df_sorted[df_sorted["Participant"].str.contains("United States|Russia", na=False)]
+#df_usa_russia.to_csv("/Users/shwetabambal/Documents/myrepos/war-analytics/usa_russia_wars.csv", index=False)
