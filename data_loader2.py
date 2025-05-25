@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import altair as alt
 
 # Load Data
 @st.cache_data
@@ -12,16 +13,20 @@ def load_data():
 
 df = load_data()
 
-# Title
-st.title("📜 Historical Wars Dashboard")
+# ----- Sidebar Configuration -----
+st.sidebar.header("📌 Filter Options")
 
-# --------------- Sidebar configuration ---------------
+# Filter by Country
+normalized_countries = sorted(df['Normalized Participant'].dropna().unique())
+selected_countries = st.sidebar.multiselect("Select Country", normalized_countries)
 
-st.sidebar.header("Filter Options")
-
-# filter by time range
-min_year = int(df['Start Date'].dropna().dt.year.min())
-max_year = int(df['End Date'].dropna().dt.year.max())
+# Filter by Time Range (Start or End Year)
+all_years = pd.concat([
+    df['Start Date'].dropna().dt.year,
+    df['End Date'].dropna().dt.year
+])
+min_year = int(all_years.min())
+max_year = int(all_years.max())
 
 selected_year_range = st.sidebar.slider(
     "Select Time Period",
@@ -30,47 +35,81 @@ selected_year_range = st.sidebar.slider(
     value=(min_year, max_year)
 )
 
-# filter by Country (from Normalized Participant column)
-st.sidebar.header("Filter by Country")
-normalized_countries = sorted(df['Normalized Participant'].dropna().unique())
-selected_countries = st.sidebar.multiselect("Select Countries", normalized_countries)
+# Filter by Keyword in Cause or Effect
+search_term = st.sidebar.text_input("Search in Cause/Effect (optional)").strip()
 
+# ----- Apply Filters -----
+filtered_df = df.copy()
 
-# ------------- Data Filtering ---------------
-
-# Filter data using the selected countries
 if selected_countries:
-    filtered_df = df[df['Normalized Participant'].isin(selected_countries)]
-else:
-    filtered_df = df.copy()
+    filtered_df = filtered_df[filtered_df['Normalized Participant'].isin(selected_countries)]
 
-# Filter data using the selected year range
 filtered_df = filtered_df[
-    (filtered_df['Start Date'].dt.year >= selected_year_range[0]) &
-    (filtered_df['End Date'].dt.year <= selected_year_range[1])
+    filtered_df['Start Date'].dt.year.between(selected_year_range[0], selected_year_range[1])
 ]
 
-# --------------------------
-# Dashboard Display
-# --------------------------
+if search_term:
+    filtered_df = filtered_df[
+        filtered_df['Cause'].fillna('').str.contains(search_term, case=False) |
+        filtered_df['Effect'].fillna('').str.contains(search_term, case=False)
+    ]
 
-# Summary
-st.subheader("🔢 Summary")
-st.write(f"Total Entries: {filtered_df.shape[0]}")
-st.write(f"Unique Wars: {filtered_df['War'].nunique()}")
-st.write(f"Unique Participants: {filtered_df['Participant'].nunique()}")
+# Calculate Duration
+filtered_df['Duration (days)'] = (filtered_df['End Date'] - filtered_df['Start Date']).dt.days
 
-# Timeline Visualization
-st.subheader("📅 War Timeline")
+# ----- Title -----
+st.title("📜 Historical Wars Dashboard")
+
+# ----- KPIs -----
+col1, col2, col3 = st.columns(3)
+col1.metric("🧮 Total Wars", filtered_df['War'].nunique())
+col2.metric("👥 Unique Participants", filtered_df['Participant'].nunique())
+col3.metric("💀 Total Casualties", f"{int(filtered_df['Casualties'].sum()):,}")
+
+# ----- Timeline -----
+st.subheader("📅 War Timeline by Start Year")
 timeline_df = filtered_df.dropna(subset=['Start Date'])
 timeline_counts = timeline_df.groupby(timeline_df['Start Date'].dt.year).size()
 st.line_chart(timeline_counts)
 
-# Participants per War
+# ----- Participants per War -----
 st.subheader("👥 Participants per War")
 participant_counts = filtered_df.groupby('War')['Participant'].nunique().sort_values(ascending=False)
 st.bar_chart(participant_counts)
 
-# Display Filtered Table
+# ----- Top Countries by War Frequency -----
+st.subheader("🌍 Top Participant Countries (by frequency)")
+top_participants = filtered_df['Normalized Participant'].value_counts().head(10)
+st.bar_chart(top_participants)
+
+# ----- War Duration Distribution -----
+st.subheader("⏳ War Duration Distribution")
+st.write("Shows the distribution of war lengths in days (where end date is known).")
+
+# Remove NaN durations
+duration_data = filtered_df['Duration (days)'].dropna()
+
+# Create a histogram using Altair
+if not duration_data.empty:
+    hist_df = pd.DataFrame({'Duration (days)': duration_data})
+    chart = alt.Chart(hist_df).mark_bar().encode(
+        alt.X("Duration (days):Q", bin=alt.Bin(maxbins=30)),
+        y='count()',
+    ).properties(width=700, height=400)
+
+    st.altair_chart(chart)
+else:
+    st.info("No duration data available to plot a histogram.")
+
+# ----- Insights -----
+st.subheader("🧠 Insights")
+if not filtered_df.empty:
+    deadliest_war = filtered_df.loc[filtered_df['Casualties'].idxmax()]
+    st.write(f"• The deadliest war is **{deadliest_war['War']}** with approximately **{int(deadliest_war['Casualties']):,} casualties**.")
+    if not top_participants.empty:
+        st.write(f"• **{top_participants.idxmax()}** appeared in the highest number of wars among selected countries.")
+
+# ----- Data Table -----
 st.subheader("📊 Filtered War Data")
 st.dataframe(filtered_df)
+
